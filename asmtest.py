@@ -28,8 +28,14 @@ os.makedirs(working_dir, exist_ok=True)
 rendered_asm = os.path.join(working_dir, 'test.asm')
 rendered_bin = os.path.join(working_dir, 'test.a')
 
+tests_total = 0
+tests_successful = 0
+
 
 def run_suite(suite_name):
+    global tests_total
+    global tests_successful
+
     with open(os.path.join(test_path, suite_name + '.asmtest')) as f:
         raw = f.read().split('-----')
         template = raw[0]
@@ -70,6 +76,7 @@ def run_suite(suite_name):
 
         if not len(messages):
             status = C_GREEN + 'PASS' + C_RESET
+            tests_successful += 1
         else:
             status = C_RED + 'FAIL' + C_RESET
 
@@ -77,6 +84,8 @@ def run_suite(suite_name):
 
         for message in messages:
             print('  {}'.format(message))
+
+        tests_total += 1
 
 
 if len(sys.argv) >= 2:
@@ -91,3 +100,6 @@ else:
 
 for suite_name in suite_names:
     run_suite(suite_name)
+
+if tests_total == tests_successful:
+    print("\n{}/{} tests successful.".format(tests_successful, tests_total))
