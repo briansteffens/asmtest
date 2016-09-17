@@ -3,7 +3,7 @@ asmtest
 
 A script to help with unit testing assembly code.
 
-![Console output example](https://s3.amazonaws.com/briansteffens/asmtest.png)
+![Console output example](https://s3.amazonaws.com/briansteffens/asmtest2.png)
 
 # Overview
 
