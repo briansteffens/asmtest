@@ -25,7 +25,10 @@ working_dir = '.asmtest'
 
 os.makedirs(working_dir, exist_ok=True)
 
-rendered_asm = os.path.join(working_dir, 'test.asm')
+rendered_asm_fn = config['rendered_file'] if 'rendered_file' in config \
+                                          else 'test.asm'
+
+rendered_asm = os.path.join(working_dir, rendered_asm_fn)
 rendered_bin = os.path.join(working_dir, 'test.a')
 
 tests_total = 0
@@ -53,7 +56,11 @@ def run_suite(suite_name):
 
         if 'before_each' in config:
             for before_each_cmd in config['before_each']:
-                subprocess.run(before_each_cmd, shell=True)
+                res = subprocess.run(before_each_cmd, shell=True)
+                if (res.returncode != 0):
+                    print('Error running before_each script: ' +
+                          before_each_cmd)
+                    sys.exit(5)
 
         res = subprocess.run([rendered_bin], stdout=subprocess.PIPE)
 
