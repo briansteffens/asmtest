@@ -58,8 +58,9 @@ def run_suite(suite_name):
             for before_each_cmd in config['before_each']:
                 res = subprocess.run(before_each_cmd, shell=True)
                 if (res.returncode != 0):
-                    print('Error running before_each script: ' +
-                          before_each_cmd)
+                    print('Error running before_each script for test '
+                          '{}.{}: {}'.format(suite_name, case['name'],
+                                             before_each_cmd))
                     sys.exit(5)
 
         res = subprocess.run([rendered_bin], stdout=subprocess.PIPE)
