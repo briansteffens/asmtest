@@ -9,6 +9,7 @@ import subprocess
 
 C_GREEN = '\033[92m'
 C_RED   = '\033[91m'
+C_BOLD  = '\033[97m'
 C_RESET = '\033[0m'
 
 
@@ -43,6 +44,8 @@ def run_suite(suite_name):
         raw = f.read().split('-----')
         template = raw[0]
         suite = json.loads(raw[1])
+
+    first = True
 
     for case in suite['cases']:
         rendered = template
@@ -88,12 +91,18 @@ def run_suite(suite_name):
         else:
             status = C_RED + 'FAIL' + C_RESET
 
-        print('[{}] {}: {}'.format(status, suite_name, case['name']))
+        if first:
+            suite_name_out = C_BOLD + suite_name + C_RESET + ": "
+        else:
+            suite_name_out = " " * (len(suite_name) + 2)
+
+        print('[{}] {}{}'.format(status, suite_name_out, case['name']))
 
         for message in messages:
             print('  {}'.format(message))
 
         tests_total += 1
+        first = False
 
 
 if len(sys.argv) >= 2:
@@ -101,10 +110,10 @@ if len(sys.argv) >= 2:
     suite_names = sys.argv[1:]
 else:
     # All suites
-    suite_names = [
-        f[len(test_path) + 1 : -len('.asmtest')] for f in
-        glob.glob(os.path.join(test_path, '**', '*.asmtest'), recursive=True)
-    ]
+    files = glob.glob(os.path.join(test_path, '**', '*.asmtest'),
+                      recursive=True)
+    files.sort()
+    suite_names = [f[len(test_path) + 1 : -len('.asmtest')] for f in files]
 
 for suite_name in suite_names:
     run_suite(suite_name)
