@@ -5,6 +5,10 @@ import sys
 import json
 import glob
 import subprocess
+import shutil
+
+
+term_width, _ = shutil.get_terminal_size((80, 20))
 
 
 C_GREEN = '\033[92m'
@@ -47,6 +51,8 @@ def run_suite(suite_name):
 
     first = True
 
+    print(C_BOLD + suite_name + C_RESET)
+
     for case in suite['cases']:
         rendered = template
 
@@ -85,18 +91,23 @@ def run_suite(suite_name):
             expect_check('stdout', case['expect_stdout'],
                          res.stdout.strip().decode('utf-8'))
 
+        out_line = '    ' + case['name']
+
+        if len(out_line) > term_width - 7:
+            out_line = out_line[:term_width - 7]
+
+        while len(out_line) < term_width - 6:
+            out_line = out_line + ' '
+
         if not len(messages):
             status = C_GREEN + 'PASS' + C_RESET
             tests_successful += 1
         else:
             status = C_RED + 'FAIL' + C_RESET
 
-        if first:
-            suite_name_out = C_BOLD + suite_name + C_RESET + ": "
-        else:
-            suite_name_out = " " * (len(suite_name) + 2)
+        out_line = out_line + '[' + status + ']'
 
-        print('[{}] {}{}'.format(status, suite_name_out, case['name']))
+        print(out_line)
 
         for message in messages:
             print('  {}'.format(message))
