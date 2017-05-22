@@ -72,7 +72,7 @@ def run_suite(suite_name):
                                              before_each_cmd))
                     sys.exit(5)
 
-        res = subprocess.run([rendered_bin], stdout=subprocess.PIPE)
+        res = subprocess.run(config['run'], stdout=subprocess.PIPE)
 
         messages = []
 
