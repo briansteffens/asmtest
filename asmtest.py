@@ -72,7 +72,10 @@ def run_suite(suite_name):
                                              before_each_cmd))
                     sys.exit(5)
 
-        res = subprocess.run(config['run'], stdout=subprocess.PIPE)
+        cmd = config['run']
+        if 'args' in case:
+            cmd += ' ' + case['args']
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
 
         messages = []
 
