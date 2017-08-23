@@ -65,7 +65,7 @@ def run_suite(suite_name):
 
         if 'before_each' in config:
             for before_each_cmd in config['before_each']:
-                res = subprocess.run(before_each_cmd, shell=True)
+                res = subprocess.call(before_each_cmd, shell=True)
                 if (res.returncode != 0):
                     print('Error running before_each script for test '
                           '{}.{}: {}'.format(suite_name, case['name'],
@@ -75,7 +75,7 @@ def run_suite(suite_name):
         cmd = config['run']
         if 'args' in case:
             cmd += ' ' + case['args']
-        res = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
+        res = subprocess.call(cmd, stdout=subprocess.PIPE, shell=True)
 
         messages = []
 
