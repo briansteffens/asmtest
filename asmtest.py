@@ -124,8 +124,7 @@ if len(sys.argv) >= 2:
     suite_names = sys.argv[1:]
 else:
     # All suites
-    files = glob.glob(os.path.join(test_path, '**', '*.asmtest'),
-                      recursive=True)
+    files = glob.glob(os.path.join(test_path, '*.asmtest'))
     files.sort()
     suite_names = [f[len(test_path) + 1 : -len('.asmtest')] for f in files]
 
