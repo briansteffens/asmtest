@@ -5,7 +5,14 @@ import sys
 import json
 import glob
 import subprocess
+from subprocess import Popen, call, PIPE
 import shutil
+
+
+def shell_call(cmd):
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate()
+    return (p.returncode, output, err)
 
 
 term_width, _ = shutil.get_terminal_size((80, 20))
@@ -65,8 +72,8 @@ def run_suite(suite_name):
 
         if 'before_each' in config:
             for before_each_cmd in config['before_each']:
-                res = subprocess.call(before_each_cmd, shell=True)
-                if (res.returncode != 0):
+                res, _, _ = shell_call(before_each_cmd)
+                if (res != 0):
                     print('Error running before_each script for test '
                           '{}.{}: {}'.format(suite_name, case['name'],
                                              before_each_cmd))
@@ -75,7 +82,7 @@ def run_suite(suite_name):
         cmd = config['run']
         if 'args' in case:
             cmd += ' ' + case['args']
-        res = subprocess.call(cmd, stdout=subprocess.PIPE, shell=True)
+        res, stdout, _ = shell_call(cmd)
 
         messages = []
 
@@ -86,13 +93,12 @@ def run_suite(suite_name):
 
 
         if 'expect_status' in case:
-            expect_check('status', int(case['expect_status']), res.returncode)
+            expect_check('status', int(case['expect_status']), res)
 
-        stdout = res.stdout.strip().decode('utf-8')
+        stdout = stdout.strip().decode('utf-8')
 
         if 'expect_stdout' in case:
-            expect_check('stdout', case['expect_stdout'],
-                         res.stdout.strip().decode('utf-8'))
+            expect_check('stdout', case['expect_stdout'], stdout)
 
         out_line = '    ' + case['name']
 
