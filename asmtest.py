@@ -24,7 +24,7 @@ test_path = config['test_path'] if 'test_path' in config else 'test'
 
 if 'init' in config:
     for init_cmd in config['init']:
-        subprocess.run(init_cmd)
+        subprocess.call(init_cmd, shell=True)
 
 working_dir = '.asmtest'
 
