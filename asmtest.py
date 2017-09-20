@@ -21,6 +21,7 @@ term_width, _ = shutil.get_terminal_size((80, 20))
 C_GREEN = '\033[92m'
 C_RED   = '\033[91m'
 C_BOLD  = '\033[97m'
+C_GRAY  = '\033[90m'
 C_RESET = '\033[0m'
 
 
@@ -47,6 +48,26 @@ tests_total = 0
 tests_successful = 0
 
 
+def print_pass_fail(case_name, passed):
+    global tests_successful
+
+    out_line = '    ' + case_name
+
+    if len(out_line) > term_width - 7:
+        out_line = out_line[:term_width - 7]
+
+    while len(out_line) < term_width - 6:
+        out_line = out_line + ' '
+
+    if passed:
+        status = C_GREEN + 'PASS' + C_RESET
+        tests_successful += 1
+    else:
+        status = C_RED + 'FAIL' + C_RESET
+
+    print(out_line + '[' + status + ']')
+
+
 def run_suite(suite_name):
     global tests_total
     global tests_successful
@@ -61,6 +82,7 @@ def run_suite(suite_name):
     print(C_BOLD + suite_name + C_RESET)
 
     for case in suite['cases']:
+        tests_total += 1
         rendered = template
 
         for k,v in case.items():
@@ -70,14 +92,21 @@ def run_suite(suite_name):
         with open(rendered_asm, 'w') as f:
             f.write(rendered)
 
+        nextCase = False
+
         if 'before_each' in config:
             for before_each_cmd in config['before_each']:
                 res, _, _ = shell_call(before_each_cmd)
-                if (res != 0):
-                    print('Error running before_each script for test '
-                          '{}.{}: {}'.format(suite_name, case['name'],
-                                             before_each_cmd))
-                    sys.exit(5)
+                if res != 0:
+                    print_pass_fail(case['name'], False)
+                    print('{}Error running before_each script for test '
+                          '{}.{}: {}{}'.format(C_GRAY, suite_name,
+                          case['name'], before_each_cmd, C_RESET))
+                    nextCase = True
+                    break
+
+        if nextCase:
+            continue
 
         cmd = config['run']
         if 'args' in case:
@@ -100,28 +129,11 @@ def run_suite(suite_name):
         if 'expect_stdout' in case:
             expect_check('stdout', case['expect_stdout'], stdout)
 
-        out_line = '    ' + case['name']
-
-        if len(out_line) > term_width - 7:
-            out_line = out_line[:term_width - 7]
-
-        while len(out_line) < term_width - 6:
-            out_line = out_line + ' '
-
-        if not len(messages):
-            status = C_GREEN + 'PASS' + C_RESET
-            tests_successful += 1
-        else:
-            status = C_RED + 'FAIL' + C_RESET
-
-        out_line = out_line + '[' + status + ']'
-
-        print(out_line)
+        print_pass_fail(case['name'], len(messages) == 0)
 
         for message in messages:
             print('  {}'.format(message))
 
-        tests_total += 1
         first = False
 
 
@@ -137,5 +149,4 @@ else:
 for suite_name in suite_names:
     run_suite(suite_name)
 
-if tests_total == tests_successful:
-    print("\n{}/{} tests successful.".format(tests_successful, tests_total))
+print("\n{}/{} tests successful.".format(tests_successful, tests_total))
